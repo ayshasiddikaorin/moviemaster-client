@@ -1,214 +1,237 @@
-import { useEffect, useState } from "react";
+// src/pages/HomePage.jsx
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import MovieCard from "../../components/MovieCard";
-import axios from "axios";
+import { motion } from "framer-motion";
+import { Play, Star, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+
+// Mock Data (Firestore থেকে নেবে পরে)
+const movies = [
+  { id: 1, title: "TRON", rating: 9.1, year: 2024, genre: "Sci-Fi", poster: "https://www.filmyfenil.com/wp-content/uploads/2025/10/Tron-Ares-wallpaper.jpg", nowShowing: true },
+     { id: 2, title: "Avatar 3", rating: 0, year: 2025, genre: "Sci-Fi", poster:"https://images.hdqwalls.com/wallpapers/avatar-the-way-of-water-movie-4k-mi.jpg" , nowShowing: true },
+
+  { id: 3, title: "Deadpool & Wolverine", rating: 8.8, year: 2024, genre: "Action", poster: "https://images.hdqwalls.com/wallpapers/marvel-deadpool-and-wolverine-4k-cp.jpg", nowShowing: true },
+  { id: 4, title: "The Batman 2", rating: 0, year: 2026, genre: "Action", poster: "https://images.hdqwalls.com/wallpapers/the-batman-2-movie-2027-9r.jpg", nowShowing: true },
+];
 
 const HomePage = () => {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeTab, setActiveTab] = useState("now");
+
+  const heroSlides = movies;
 
   useEffect(() => {
-    axios
-      .get("/movies")
-      .then((res) => {
-        // নিশ্চিত করো যে res.data একটা এরে
-        const movieData = Array.isArray(res.data) ? res.data : [];
-        setMovies(movieData);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching movies:", err);
-        setMovies([]); // এরর হলেও এরে রাখো
-        setLoading(false);
-      });
-  }, []);
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroSlides.length]);
 
-  // লোডিং চেক
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
 
-  // নিশ্চিত করো movies একটা এরে
-  const safeMovies = Array.isArray(movies) ? movies : [];
-
-  // সেকশনের জন্য ডাটা
-  const featuredMovies = safeMovies.slice(0, 5);
-  const topRated = [...safeMovies]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 5);
-  const recentlyAdded = [...safeMovies]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 6);
-
-  const genres = [
-    "Action", "Drama", "Comedy", "Sci-Fi", "Horror", "Romance", "Thriller", "Animation"
-  ];
+  const filteredMovies = activeTab === "now" 
+    ? movies.filter(m => m.nowShowing)
+    : movies.filter(m => !m.nowShowing);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-16">
-      {/* Hero Carousel */}
-      <section className="relative h-96 md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-        <div className="carousel w-full h-full">
-          {featuredMovies.length > 0 ? (
-            featuredMovies.map((movie, index) => (
-              <div
-                key={movie._id || index}
-                id={`slide${index}`}
-                className="carousel-item relative w-full h-full"
-              >
-                <img
-                  src={movie.posterUrl || "https://i.ibb.co/0jK6Z3t/placeholder.jpg"}
-                  alt={movie.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6 text-white">
-                  <h1 className="text-3xl md:text-5xl font-bold mb-2">
-                    {movie.title}
-                  </h1>
-                  <p className="text-sm md:text-lg opacity-90 mb-3">
-                    {movie.genre} • {movie.releaseYear} • {movie.duration} min
-                  </p>
-                  <Link
-                    to={`/movies/${movie._id}`}
-                    className="btn btn-primary btn-sm md:btn-md"
-                  >
-                    Watch Now
-                  </Link>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="flex items-center justify-center h-full bg-gray-200">
-              <p className="text-xl">No featured movies yet.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Carousel Dots */}
-        {featuredMovies.length > 0 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-            {featuredMovies.map((_, i) => (
-              <a
-                key={i}
-                href={`#slide${i}`}
-                className="btn btn-xs btn-circle bg-white/40 hover:bg-white/70 text-xs"
-              >
-                {i + 1}
-              </a>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Statistics */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-        <div className="bg-blue-600 text-white p-6 rounded-xl shadow">
-          <div className="text-4xl font-bold">{safeMovies.length}</div>
-          <p className="text-white/80">Total Movies</p>
-        </div>
-        <div className="bg-green-600 text-white p-6 rounded-xl shadow">
-          <div className="text-4xl font-bold">150+</div>
-          <p className="text-white/80">Active Users</p>
-        </div>
-        <div className="bg-purple-600 text-white p-6 rounded-xl shadow">
-          <div className="text-4xl font-bold">
-            {safeMovies.length > 0
-              ? (safeMovies.reduce((a, b) => a + (b.rating || 0), 0) / safeMovies.length).toFixed(1)
-              : "0"}
-          </div>
-          <p className="text-white/80">Avg Rating</p>
-        </div>
-      </section>
-
-      {/* Top Rated Movies */}
-      <section>
-        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-          Top Rated Movies
-        </h2>
-        {topRated.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {topRated.map((movie) => (
-              <div
-                key={movie._id}
-                className="transform transition duration-300 hover:scale-105"
-              >
-                <MovieCard movie={movie} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">No movies available.</p>
-        )}
-      </section>
-
-      {/* Recently Added */}
-      <section>
-        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-          Recently Added
-        </h2>
-        {recentlyAdded.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {recentlyAdded.map((movie) => (
-              <Link key={movie._id} to={`/movies/${movie._id}`} className="group">
-                <img
-                  src={movie.posterUrl || "https://i.ibb.co/0jK6Z3t/placeholder.jpg"}
-                  alt={movie.title}
-                  className="w-full h-48 object-cover rounded-lg shadow-md group-hover:shadow-xl transition-shadow"
-                />
-                <p className="text-sm font-medium mt-2 text-center truncate px-2">
-                  {movie.title}
-                </p>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">No recent movies.</p>
-        )}
-      </section>
-
-      {/* Genre Section */}
-      <section className="text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">Browse by Genre</h2>
-        <div className="flex flex-wrap justify-center gap-3">
-          {genres.map((genre) => (
-            <Link
-              key={genre}
-              to={`/movies?genre=${genre}`}
-              className="badge badge-lg badge-outline hover:badge-primary transition-all px-4 py-2"
+    <div className="min-h-screen bg-black text-white overflow-hidden">
+      {/* Hero Slider */}
+      <section className="relative h-screen">
+        <div className="absolute inset-0">
+          {heroSlides.map((movie, index) => (
+            <motion.div
+              key={movie.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: currentSlide === index ? 1 : 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
             >
-              {genre}
-            </Link>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent z-10" />
+              <img
+                src={movie.poster}
+                alt={movie.title}
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Slider Content */}
+        <div className="relative z-20 h-full flex items-center container mx-auto px-4">
+          <motion.div
+            key={currentSlide}
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-2xl"
+          >
+            <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 mb-4">
+              {heroSlides[currentSlide]?.title}
+            </h1>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-1">
+                <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                <span className="text-xl font-bold text-orange-400">{heroSlides[currentSlide]?.rating || "TBA"}</span>
+              </div>
+              <span className="text-gray-300">• {heroSlides[currentSlide]?.year}</span>
+              <span className="text-gray-300">• {heroSlides[currentSlide]?.genre}</span>
+            </div>
+            <div className="flex gap-4">
+              <button className="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg">
+                <Play size={20} /> Watch Trailer
+              </button>
+              <Link
+                to="/movies"
+                className="px-8 py-3 bg-white/10 backdrop-blur-xl border border-orange-500/50 rounded-full font-bold hover:bg-orange-500/20 transition-all"
+              >
+                View Details
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Slider Controls */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-orange-500/30 transition-all"
+        >
+          <ChevronLeft size={28} className="text-orange-400" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-orange-500/30 transition-all"
+        >
+          <ChevronRight size={28} className="text-orange-400" />
+        </button>
+
+        {/* Dots */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                currentSlide === i ? "bg-orange-500 w-8" : "bg-white/50"
+              }`}
+            />
           ))}
         </div>
       </section>
 
-      {/* About Platform */}
-      <section className="bg-base-200 rounded-2xl p-8 md:p-12 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Welcome to MovieMaster Pro
-        </h2>
-        <p className="text-lg max-w-3xl mx-auto mb-6">
-          Organize, discover, and manage your favorite movies in one place. Add
-          personal collections, rate movies, and explore trending titles with
-          advanced filters.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div>
-            <div className="text-5xl mb-2">Star</div>
-            <p className="font-semibold">Rate & Review</p>
+      {/* Now Showing / Coming Soon */}
+      <section className="py-16 container mx-auto px-4">
+        <div className="flex flex-col items-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 mb-8">
+            Explore Movies
+          </h2>
+
+          {/* Tabs */}
+          <div className="flex gap-2 bg-white/10 backdrop-blur-xl rounded-full p-1 mb-8">
+            <button
+              onClick={() => setActiveTab("now")}
+              className={`px-8 py-3 rounded-full font-bold transition-all ${
+                activeTab === "now"
+                  ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
+                  : "text-gray-300 hover:text-orange-400"
+              }`}
+            >
+              Now Showing
+            </button>
+            <button
+              onClick={() => setActiveTab("coming")}
+              className={`px-8 py-3 rounded-full font-bold transition-all ${
+                activeTab === "coming"
+                  ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
+                  : "text-gray-300 hover:text-orange-400"
+              }`}
+            >
+              Coming Soon
+            </button>
           </div>
-          <div>
-            <div className="text-5xl mb-2">Heart</div>
-            <p className="font-semibold">Build Watchlist</p>
-          </div>
-          <div>
-            <div className="text-5xl mb-2">Paintbrush</div>
-            <p className="font-semibold">Dark/Light Mode</p>
+
+          <Link
+            to="/movies"
+            className="px-8 py-3 bg-white/10 backdrop-blur-xl border border-orange-500/50 rounded-full font-bold hover:bg-orange-500/20 transition-all"
+          >
+            View All Movies
+          </Link>
+        </div>
+
+        {/* Movie Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {filteredMovies.map((movie) => (
+            <motion.div
+              key={movie.id}
+              initial={{ y: 50, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="group relative bg-white/5 backdrop-blur-xl border border-orange-800/30 rounded-2xl overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-500"
+            >
+              <div className="aspect-w-2 aspect-h-3 relative overflow-hidden">
+                <img
+                  src={movie.poster}
+                  alt={movie.title}
+                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+
+              {/* Hover Details */}
+              <div className="absolute inset-0 bg-black/90 backdrop-blur-xl p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                <h3 className="text-xl font-bold text-orange-400 mb-2">{movie.title}</h3>
+                <div className="flex items-center gap-3 text-sm text-gray-300 mb-3">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    <span>{movie.rating || "TBA"}</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>{movie.year}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">{movie.genre}</p>
+                <button className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform">
+                  View Details
+                </button>
+              </div>
+
+              {/* Default Card Info */}
+              <div className="p-4">
+                <h3 className="font-bold text-lg truncate">{movie.title}</h3>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="flex items-center gap-1 text-orange-400">
+                    <Star size={16} className="fill-current" />
+                    {movie.rating || "TBA"}
+                  </span>
+                  <span className="text-sm text-gray-400">{movie.year}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Custom Section - Featured Collections */}
+      <section className="py-16 bg-gradient-to-b from-transparent via-orange-900/10 to-transparent">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 mb-8">
+            Featured Collections
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {["Top Rated", "Sci-Fi Classics", "Action Packed"].map((title, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white/5 backdrop-blur-xl border border-orange-800/30 rounded-2xl p-8 cursor-pointer"
+              >
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-orange-700 rounded-full flex items-center justify-center">
+                  <Play size={32} className="text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-orange-400">{title}</h3>
+                <p className="text-gray-400 mt-2">Explore {i === 0 ? "highest rated" : i === 1 ? "sci-fi gems" : "adrenaline rushes"}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

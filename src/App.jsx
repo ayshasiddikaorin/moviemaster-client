@@ -1,17 +1,29 @@
+// src/App.jsx
+import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-
-
-function App() {
- 
-  
-
+const App = ({ children }) => {
   return (
-    <>
-       <h1 class="text-3xl font-bold underline">
-    Hello world!
-  </h1>
-    </>
-  )
-}
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+        {children}
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
 
-export default App
+export default App;
