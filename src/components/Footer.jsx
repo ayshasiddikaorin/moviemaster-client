@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black text-orange-500 py-10 mt-16">
+    <footer className="bg-black text-orange-500 pt-10">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 
@@ -18,10 +20,18 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-3">Quick Links</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/" className="hover:text-orange-300 transition">Home</a></li>
-              <li><a href="/movies" className="hover:text-orange-300 transition">All Movies</a></li>
-              <li><a href="/about" className="hover:text-orange-300 transition">About Us</a></li>
-              <li><a href="/contact" className="hover:text-orange-300 transition">Contact</a></li>
+              <li>
+                <Link to="/" className="hover:text-orange-300 transition">Home</Link>
+              </li>
+              <li>
+                <Link to="/movies" className="hover:text-orange-300 transition">All Movies</Link>
+              </li>
+              <li>
+                <Link to="/about" className="hover:text-orange-300 transition">About Us</Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-orange-300 transition">Contact</Link>
+              </li>
             </ul>
           </div>
 
@@ -40,58 +50,22 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Follow Us with Real Logos */}
+          {/* Social */}
           <div>
             <h4 className="font-semibold text-lg mb-4">Follow Us</h4>
             <div className="flex gap-4">
-
-              {/* Facebook */}
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition transform hover:scale-110"
-                aria-label="Facebook"
-              >
-                <img
-                  src="https://cdn-icons-png.flaticon.com/32/5968/5968764.png"
-                  alt="Facebook"
-                  className="w-5 h-5"
-                />
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition transform hover:scale-110">
+                <img src="https://cdn-icons-png.flaticon.com/32/5968/5968764.png" alt="Facebook" className="w-5 h-5" />
               </a>
-
-              {/* X (Twitter) */}
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition transform hover:scale-110"
-                aria-label="X"
-              >
-                <img
-                  src="https://cdn-icons-png.flaticon.com/32/5969/5969020.png"
-                  alt="X"
-                  className="w-5 h-5"
-                />
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition transform hover:scale-110">
+                <img src="https://cdn-icons-png.flaticon.com/32/5969/5969020.png" alt="X" className="w-5 h-5" />
               </a>
-
-              {/* Instagram */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition transform hover:scale-110"
-                aria-label="Instagram"
-              >
-                <img
-                  src="https://cdn-icons-png.flaticon.com/32/5968/5968814.png"
-                  alt="Instagram"
-                  className="w-5 h-5"
-                />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center hover:bg-orange-700 transition transform hover:scale-110">
+                <img src="https://cdn-icons-png.flaticon.com/32/5968/5968814.png" alt="Instagram" className="w-5 h-5" />
               </a>
-
             </div>
           </div>
+
         </div>
 
         {/* Bottom */}
