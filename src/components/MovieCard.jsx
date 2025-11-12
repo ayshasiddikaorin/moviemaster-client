@@ -34,12 +34,20 @@ const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
         {/* Actions: Edit / Delete / View Details */}
         {showActions ? (
           <div className="flex gap-2">
+
             <button
               onClick={onEdit}
               className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1"
             >
               <Edit2 size={16} /> Edit
             </button>
+            
+               {/* <Link
+                to="/add-movie"
+                className="px-8 py-3 bg-white/10 backdrop-blur-xl border border-orange-500/50 rounded-full font-bold hover:bg-orange-500/20 transition-all"
+              >
+                Edit
+              </Link> */}
             <button
               onClick={onDelete}
               className="flex-1 py-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1"

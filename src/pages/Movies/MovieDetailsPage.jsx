@@ -170,7 +170,7 @@ const MovieDetailsPage = () => {
             {isOwner && (
               <div className="flex gap-4 mt-8">
                 <Link
-                  to={`/movies/update/${movie._id}`}
+                  to={`/add-movie/${movie._id}`}
                   className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-700 text-white font-bold rounded-xl hover:from-orange-600 hover:to-orange-800 transition-all transform hover:scale-105 shadow-lg"
                 >
                   <FaEdit /> Edit Movie

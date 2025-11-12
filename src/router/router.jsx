@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
 
       // Private Routes
       {
-        path: "add-movie",
+        path: "add-movie/:id?",
         element: (
           <PrivateRoute>
             <AddMoviePage />
