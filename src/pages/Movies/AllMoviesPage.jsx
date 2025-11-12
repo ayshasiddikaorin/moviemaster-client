@@ -1,7 +1,6 @@
 // src/pages/AllMoviesPage.jsx
 import { useState, useEffect } from "react";
 import MovieCard from "../../components/MovieCard";
-
 import { api } from "../../utils/api";
 
 const AllMoviesPage = () => {
@@ -13,10 +12,19 @@ const AllMoviesPage = () => {
       .then(data => {
         setMovies(data);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
       });
   }, []);
 
-  if (loading) return <p className="text-center py-20 text-orange-300">Loading movies...</p>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black py-24 px-4">
@@ -34,4 +42,4 @@ const AllMoviesPage = () => {
   );
 };
 
-export default MovieCard;
+export default AllMoviesPage; 
