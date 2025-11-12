@@ -39,7 +39,7 @@ const MovieDetailsPage = () => {
     try {
       await api.deleteMovie(id);
       toast.success("Movie deleted successfully");
-      navigate("/movies/my-collection");
+      navigate("/my-collection");
     // eslint-disable-next-line no-unused-vars
     } catch (err) {
       toast.error("Failed to delete movie");

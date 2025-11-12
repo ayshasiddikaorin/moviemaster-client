@@ -11,7 +11,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  // Eye Icon এর জন্য স্টেট
+  // Eye Icon submit
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -24,7 +24,7 @@ const RegisterPage = () => {
 
   const password = watch("password");
 
-  // রেজিস্ট্রেশন সাবমিট
+  // registration submit
   const onSubmit = async (data) => {
     setLoading(true);
     try {
@@ -39,7 +39,7 @@ const RegisterPage = () => {
     }
   };
 
-  // গুগল লগইন
+  // google login
   const handleGoogle = async () => {
     setLoading(true);
     try {

@@ -21,6 +21,7 @@ const MyCollectionPage = () => {
         const data = await api.getMovies();
         const myMovies = data.filter(m => m.addedBy === user.email);
         setMovies(myMovies);
+      // eslint-disable-next-line no-unused-vars
       } catch (err) {
         toast.error("Failed to load your collection");
       } finally {
@@ -36,12 +37,13 @@ const MyCollectionPage = () => {
       await api.deleteMovie(id);
       setMovies(prev => prev.filter(m => m._id !== id));
       toast.success("Movie deleted from collection!");
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       toast.error("Failed to delete movie");
     }
   };
 
-  // লগইন না থাকলে
+  
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-orange-400">
@@ -51,7 +53,7 @@ const MyCollectionPage = () => {
     );
   }
 
-  // লোডিং
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-black">
@@ -60,7 +62,7 @@ const MyCollectionPage = () => {
     );
   }
 
-  // কোনো মুভি নেই
+  
   if (movies.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-orange-400">
@@ -73,12 +75,12 @@ const MyCollectionPage = () => {
   return (
     <div className="min-h-screen bg-black py-24 px-4">
       <div className="container mx-auto">
-        {/* হেডার */}
+        { }
         <h1 className="text-5xl md:text-6xl font-black text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
           My Collection ({movies.length})
         </h1>
 
-        {/* মুভি গ্রিড */}
+        { }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {movies.map((movie) => (
             <MovieCard
