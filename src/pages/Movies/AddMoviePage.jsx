@@ -2,8 +2,6 @@ import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../context/AuthContext";
-// import { db } from "../../firebase/firebase.config";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 
@@ -11,7 +9,13 @@ const AddMoviePage = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
 
   const onSubmit = async (data) => {
     if (!user) {
@@ -21,22 +25,43 @@ const AddMoviePage = () => {
     }
 
     setLoading(true);
+
+    // Build the exact payload the API expects
+    const payload = {
+      title: data.title,
+      genre: data.genre,
+      releaseYear: parseInt(data.releaseYear, 10),
+      director: data.director,
+      cast: data.cast,
+      rating: parseFloat(data.rating),
+      duration: parseInt(data.duration, 10),
+      plotSummary: data.plotSummary,
+      posterUrl: data.posterUrl,
+      language: data.language,
+      country: data.country,
+      addedBy: user.email,
+      nowShowing: data.nowShowing === "true", // API expects boolean
+    };
+
     try {
-      await addDoc(collection(db, "movies"), {
-        title: data.title,
-        year: parseInt(data.year),
-        genre: data.genre,
-        description: data.description,
-        poster: data.poster,
-        rating: parseFloat(data.rating),
-        addedBy: user.email,
-        createdAt: serverTimestamp(),
+      const res = await fetch("http://localhost:5000/api/movies/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to add movie");
+      }
+
       toast.success("Movie added successfully!");
       reset();
-      navigate("/movies/my-collection");
+      navigate("/my-collection");
     } catch (err) {
-      toast.error("Failed to add movie");
+      toast.error(err.message || "Failed to add movie");
     } finally {
       setLoading(false);
     }
@@ -44,8 +69,6 @@ const AddMoviePage = () => {
 
   return (
     <div className="min-h-[calc(100vh-100px)] bg-black flex items-center justify-center px-4 py-16 relative overflow-hidden">
-      {/* ↑ py-16 যোগ করা হয়েছে যাতে উপরে নিচে যথেষ্ট ফাঁকা থাকে */}
-      
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 opacity-50">
         <div className="absolute top-0 left-0 w-96 h-96 bg-orange-600 rounded-full blur-3xl animate-pulse"></div>
@@ -63,7 +86,9 @@ const AddMoviePage = () => {
           <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
             Add New Movie
           </h1>
-          <p className="text-orange-300 text-sm mt-2">Share your favorite film</p>
+          <p className="text-orange-300 text-sm mt-2">
+            Share your favorite film
+          </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -75,18 +100,26 @@ const AddMoviePage = () => {
               placeholder="Movie Title"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title.message}</p>}
+            {errors.title && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.title.message}
+              </p>
+            )}
           </div>
 
           {/* Poster URL */}
           <div>
             <input
-              {...register("poster", { required: "Poster URL is required" })}
+              {...register("posterUrl", { required: "Poster URL is required" })}
               type="url"
               placeholder="Poster URL"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.poster && <p className="text-red-400 text-xs mt-1">{errors.poster.message}</p>}
+            {errors.posterUrl && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.posterUrl.message}
+              </p>
+            )}
           </div>
 
           {/* Rating */}
@@ -95,14 +128,18 @@ const AddMoviePage = () => {
               {...register("rating", {
                 required: "Rating is required",
                 min: { value: 0, message: "Min 0" },
-                max: { value: 10, message: "Max 10" }
+                max: { value: 10, message: "Max 10" },
               })}
               type="number"
               step="0.1"
               placeholder="Rating (0-10)"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.rating && <p className="text-red-400 text-xs mt-1">{errors.rating.message}</p>}
+            {errors.rating && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.rating.message}
+              </p>
+            )}
           </div>
 
           {/* Genre */}
@@ -119,46 +156,157 @@ const AddMoviePage = () => {
               <option value="Horror">Horror</option>
               <option value="Thriller">Thriller</option>
             </select>
-            {errors.genre && <p className="text-red-400 text-xs mt-1">{errors.genre.message}</p>}
+            {errors.genre && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.genre.message}
+              </p>
+            )}
           </div>
 
-          {/* Year */}
+          {/* Release Year */}
           <div>
             <input
-              {...register("year", {
+              {...register("releaseYear", {
                 required: "Release Year is required",
-                min: { value: 1900, message: "Min 1900" }
+                min: { value: 1900, message: "Min 1900" },
               })}
               type="number"
               placeholder="Release Year"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.year && <p className="text-red-400 text-xs mt-1">{errors.year.message}</p>}
+            {errors.releaseYear && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.releaseYear.message}
+              </p>
+            )}
           </div>
 
-          {/* Description */}
+          {/* Director */}
           <div>
-            <textarea
-              {...register("plotSummary", { required: "Plot Summary is required" })}
-              placeholder="Plot Summary"
-              rows="4"
+            <input
+              {...register("director", { required: "Director is required" })}
+              type="text"
+              placeholder="Director"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.plotSummary && <p className="text-red-400 text-xs mt-1">{errors.plotSummary.message}</p>}
+            {errors.director && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.director.message}
+              </p>
+            )}
           </div>
 
+          {/* Cast */}
+          <div>
+            <input
+              {...register("cast", { required: "Cast is required" })}
+              type="text"
+              placeholder="Cast (comma separated)"
+              className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
+            />
+            {errors.cast && (
+              <p className="text-red-400 text-xs mt-1">{errors.cast.message}</p>
+            )}
+          </div>
+
+          {/* Duration */}
+          <div>
+            <input
+              {...register("duration", {
+                required: "Duration is required",
+                min: { value: 1, message: "Min 1 min" },
+              })}
+              type="number"
+              placeholder="Duration (minutes)"
+              className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
+            />
+            {errors.duration && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.duration.message}
+              </p>
+            )}
+          </div>
+
+          {/* Language */}
+          <div>
+            <input
+              {...register("language", { required: "Language is required" })}
+              type="text"
+              placeholder="Language"
+              className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
+            />
+            {errors.language && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.language.message}
+              </p>
+            )}
+          </div>
+
+          {/* Country */}
+          <div>
+            <input
+              {...register("country", { required: "Country is required" })}
+              type="text"
+              placeholder="Country"
+              className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
+            />
+            {errors.country && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.country.message}
+              </p>
+            )}
+          </div>
+
+          {/* Now Showing */}
+          <div>
+            <select
+              {...register("nowShowing", { required: "Select showing status" })}
+              className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-orange-400 placeholder-orange-300 focus:outline-none focus:border-orange-300 transition appearance-none"
+            >
+              <option value="">Now Showing?</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+            {errors.nowShowing && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.nowShowing.message}
+              </p>
+            )}
+          </div>
+
+          {/* Plot Summary */}
+          <div>
+            <textarea
+              {...register("plotSummary", {
+                required: "Plot Summary is required",
+              })}
+              placeholder="Plot Summary"
+              rows={4}
+              className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
+            />
+            {errors.plotSummary && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.plotSummary.message}
+              </p>
+            )}
+          </div>
+
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
             className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-700 text-white font-bold rounded-xl hover:from-orange-600 hover:to-orange-800 transition-all transform hover:scale-105 shadow-lg disabled:opacity-70"
           >
-            {loading ? "Adding..." : "Add Movie"}
+            {loading ? "Adding…" : "Add Movie"}
           </button>
         </form>
 
         <p className="text-center text-orange-300 text-sm mt-6">
           Changed your mind?{" "}
-          <Link to="/movies" className="text-orange-500 font-bold hover:underline">
+          <Link
+            to="/movies"
+            className="text-orange-500 font-bold hover:underline"
+          >
             Back to Movies
           </Link>
         </p>

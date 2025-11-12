@@ -1,24 +1,37 @@
-// src/pages/HomePage.jsx
+// src/pages/Home/HomePage.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Play, Star, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { api } from "../../utils/api";
 
-// Mock Data (Firestore থেকে নেবে পরে)
-const movies = [
-  { id: 1, title: "TRON", rating: 9.1, year: 2024, genre: "Sci-Fi", poster: "https://www.filmyfenil.com/wp-content/uploads/2025/10/Tron-Ares-wallpaper.jpg", nowShowing: true },
-     { id: 2, title: "Avatar 3", rating: 0, year: 2025, genre: "Sci-Fi", poster:"https://images.hdqwalls.com/wallpapers/avatar-the-way-of-water-movie-4k-mi.jpg" , nowShowing: true },
 
-  { id: 3, title: "Deadpool & Wolverine", rating: 8.8, year: 2024, genre: "Action", poster: "https://images.hdqwalls.com/wallpapers/marvel-deadpool-and-wolverine-4k-cp.jpg", nowShowing: true },
-  { id: 4, title: "The Batman 2", rating: 0, year: 2026, genre: "Action", poster: "https://images.hdqwalls.com/wallpapers/the-batman-2-movie-2027-9r.jpg", nowShowing: true },
-];
+// const movies = [
+//   { id: 1, title: "TRON", rating: 9.1, year: 2024, genre: "Sci-Fi", poster: "https://www.filmyfenil.com/wp-content/uploads/2025/10/Tron-Ares-wallpaper.jpg", nowShowing: true },
+//   { id: 2, title: "Avatar 3", rating: 0, year: 2025, genre: "Sci-Fi", poster: "https://images.hdqwalls.com/wallpapers/avatar-the-way-of-water-movie-4k-mi.jpg", nowShowing: true },
+
+//   { id: 3, title: "Deadpool & Wolverine", rating: 8.8, year: 2024, genre: "Action", poster: "https://images.hdqwalls.com/wallpapers/marvel-deadpool-and-wolverine-4k-cp.jpg", nowShowing: true },
+//   { id: 4, title: "The Batman 2", rating: 0, year: 2026, genre: "Action", poster: "https://images.hdqwalls.com/wallpapers/the-batman-2-movie-2027-9r.jpg", nowShowing: true },
+// ];
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeTab, setActiveTab] = useState("now");
-
-  const heroSlides = movies;
-
+  
+  const [movies, setMovies] = useState([]);
+ const [loading, setLoading] = useState(true);
+  useEffect(() => {
+      api.getMovies()
+        .then(data => {
+          setMovies(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    }, []);
+ const heroSlides = movies;
+ 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -26,10 +39,17 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
+ if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
 
-  const filteredMovies = activeTab === "now" 
+  const filteredMovies = activeTab === "now"
     ? movies.filter(m => m.nowShowing)
     : movies.filter(m => !m.nowShowing);
 
@@ -48,7 +68,7 @@ const HomePage = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent z-10" />
               <img
-                src={movie.poster}
+                src={movie.posterUrl}
                 alt={movie.title}
                 className="w-full h-full object-cover"
               />
@@ -110,9 +130,8 @@ const HomePage = () => {
             <button
               key={i}
               onClick={() => setCurrentSlide(i)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                currentSlide === i ? "bg-orange-500 w-8" : "bg-white/50"
-              }`}
+              className={`w-3 h-3 rounded-full transition-all ${currentSlide === i ? "bg-orange-500 w-8" : "bg-white/50"
+                }`}
             />
           ))}
         </div>
@@ -129,21 +148,19 @@ const HomePage = () => {
           <div className="flex gap-2 bg-white/10 backdrop-blur-xl rounded-full p-1 mb-8">
             <button
               onClick={() => setActiveTab("now")}
-              className={`px-8 py-3 rounded-full font-bold transition-all ${
-                activeTab === "now"
-                  ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
-                  : "text-gray-300 hover:text-orange-400"
-              }`}
+              className={`px-8 py-3 rounded-full font-bold transition-all ${activeTab === "now"
+                ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
+                : "text-gray-300 hover:text-orange-400"
+                }`}
             >
               Now Showing
             </button>
             <button
               onClick={() => setActiveTab("coming")}
-              className={`px-8 py-3 rounded-full font-bold transition-all ${
-                activeTab === "coming"
-                  ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
-                  : "text-gray-300 hover:text-orange-400"
-              }`}
+              className={`px-8 py-3 rounded-full font-bold transition-all ${activeTab === "coming"
+                ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
+                : "text-gray-300 hover:text-orange-400"
+                }`}
             >
               Coming Soon
             </button>
@@ -161,7 +178,7 @@ const HomePage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredMovies.map((movie) => (
             <motion.div
-              key={movie.id}
+              key={movie._id}
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -169,7 +186,7 @@ const HomePage = () => {
             >
               <div className="aspect-w-2 aspect-h-3 relative overflow-hidden">
                 <img
-                  src={movie.poster}
+                  src={movie.posterUrl}
                   alt={movie.title}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -191,9 +208,11 @@ const HomePage = () => {
                   </div>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">{movie.genre}</p>
-                <button className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform">
-                  View Details
-                </button>
+                <Link to={`/movie/${movie._id}`} className="w-full">
+                  <button className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform">
+                    View Details
+                  </button>
+                </Link>
               </div>
 
               {/* Default Card Info */}

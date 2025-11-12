@@ -49,7 +49,7 @@ const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
           </div>
         ) : (
           <Link
-            to={`/movies/${movie._id}`}
+            to={`/movie/${movie._id}`}
             className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform text-center"
           >
             View Details

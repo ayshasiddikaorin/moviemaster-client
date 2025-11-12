@@ -23,22 +23,45 @@ export const AuthProvider = ({ children }) => {
 
   const googleProvider = new GoogleAuthProvider();
 
-  const login = (email, password) =>
-    signInWithEmailAndPassword(auth, email, password);
+  const login = async (email, password) => {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const token = await cred.user.getIdToken();
+    localStorage.setItem("fbIdToken", token);
+    return cred;
+  };
 
-  const register = (email, password) =>
-    createUserWithEmailAndPassword(auth, email, password);
+  const register = async (email, password) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const token = await cred.user.getIdToken();
+    localStorage.setItem("fbIdToken", token);
+    return cred;
+  };
 
-  const googleLogin = () => signInWithPopup(auth, googleProvider);
+  const googleLogin = async () => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const token = await cred.user.getIdToken();
+    localStorage.setItem("fbIdToken", token);
+    return cred;
+  };
 
   const updateUserProfile = (name, photo) =>
     updateProfile(auth.currentUser, { displayName: name, photoURL: photo });
 
-  const logout = () => signOut(auth);
+  const logout = async () => {
+    localStorage.removeItem("fbIdToken");
+    await signOut(auth);
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        localStorage.setItem("fbIdToken", token);
+        setUser(currentUser);
+      } else {
+        localStorage.removeItem("fbIdToken");
+        setUser(null);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
