@@ -3,34 +3,64 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../../utils/api";
 import { AuthContext } from "../../context/AuthContext";
-import toast from "react-hot-toast"; // Changed to hot-toast
-// import { motion } from "framer-motion";
+import { useWatchlist } from "../../context/WatchlistContext";
+import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { FaStar, FaClock, FaCalendar, FaUser, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
+import { FaStar, FaClock, FaCalendar, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 
 const MovieDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { watchlist, addToWatchlist: addToWatchlistContext, removeFromWatchlist: removeFromWatchlistContext } = useWatchlist();
+
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [watchlistProcessing, setWatchlistProcessing] = useState(false);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+
+  // Robust check: watchlist item for this movie (for current user) - used as fallback or for docId
+  const findWatchlistItemForMovie = () => {
+    if (!movie || !watchlist || !Array.isArray(watchlist)) return null;
+
+    return watchlist.find((w) => {
+      if (w.movieId && String(w.movieId) === String(movie._id)) return true;
+      if (w.originalMovie && w.originalMovie._id && String(w.originalMovie._id) === String(movie._id)) return true;
+      if (w.movie && w.movie._id && String(w.movie._id) === String(movie._id)) return true;
+      if (w._id && String(w._id) === String(movie._id)) return true;
+      return false;
+    }) || null;
+  };
+
+  const watchlistItem = findWatchlistItemForMovie();
 
   useEffect(() => {
-    const fetchMovie = async () => {
+    let mounted = true;
+    const fetchMovieAndCheckWatchlist = async () => {
       try {
         const data = await api.getMovieById(id);
+        if (!mounted) return;
+
         setMovie(data);
-      // eslint-disable-next-line no-unused-vars
+
+        if (user && user.uid) {
+          const check = await api.checkWatchlist(user.uid, data._id);
+          console.log(check);
+          setIsInWatchlist(!!check.exists); // Set based on API response
+        }
       } catch (err) {
         toast.error("Movie not found");
         navigate("/movies");
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
-    fetchMovie();
-  }, [id, navigate]);
+    fetchMovieAndCheckWatchlist();
+    return () => {
+      mounted = false;
+    };
+  }, [id, navigate, user]);
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this movie?")) return;
@@ -40,11 +70,72 @@ const MovieDetailsPage = () => {
       await api.deleteMovie(id);
       toast.success("Movie deleted successfully");
       navigate("/my-collection");
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
+      console.error(err);
       toast.error("Failed to delete movie");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleWatchlistClick = async () => {
+    if (!movie) return;
+    if (!user || !user.email || !user.uid) {
+      toast.error("You must be logged in to manage your watchlist");
+      return;
+    }
+
+    if (isInWatchlist) {
+      const watchlistDocId = watchlistItem && watchlistItem._id ? watchlistItem._id : null;
+
+      if (!watchlistDocId) {
+        toast.error("Can't determine watchlist item id to delete. Please open watchlist page and remove it from there.");
+        return;
+      }
+
+      setWatchlistProcessing(true);
+      try {
+        await api.deleteWatchlist(watchlistDocId); // expected to call DELETE /api/watchListDelete/:id
+        // update local context
+        removeFromWatchlistContext(watchlistDocId);
+        setIsInWatchlist(false); // Update state
+        toast.info(`${movie.title} removed from Watchlist`);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to remove from watchlist");
+      } finally {
+        setWatchlistProcessing(false);
+      }
+      return;
+    }
+
+    setWatchlistProcessing(true);
+    try {
+      // prepare payload -- include movieId and addedBy to let backend know owner
+      const payload = {
+        movieId: movie._id,
+        title: movie.title,
+        posterUrl: movie.posterUrl,
+        addedBy: user.email,
+        originalMovie: movie, // optional: full movie object if you want
+        createdAt: new Date()
+      };
+
+      const inserted = await api.addToWatchlist(payload); 
+      if (inserted && inserted._id) {
+        addToWatchlistContext(inserted);
+        setIsInWatchlist(true); 
+        toast.success(`${movie.title} added to Watchlist`);
+      } else {
+        addToWatchlistContext({ ...payload, _id: inserted?._id || `tmp-${Date.now()}` });
+        setIsInWatchlist(true); 
+        toast.success(`${movie.title} added to Watchlist (locally)`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add to watchlist");
+    } finally {
+      setWatchlistProcessing(false);
     }
   };
 
@@ -68,7 +159,7 @@ const MovieDetailsPage = () => {
           to="/movies"
           className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 transition"
         >
-          <FaArrowLeft /> Back to Movies
+          <FaArrowLeft /> 
         </Link>
       </div>
 
@@ -83,7 +174,7 @@ const MovieDetailsPage = () => {
           <div className="md:col-span-1">
             <div className="relative group">
               <img
-                src={movie.posterUrl}
+                src={movie.posterUrl || "https://via.placeholder.com/500x750?text=No+Poster"}
                 alt={movie.title}
                 className="w-full rounded-2xl shadow-2xl border border-orange-500/30"
               />
@@ -164,6 +255,19 @@ const MovieDetailsPage = () => {
             <div>
               <p className="text-gray-400 mb-2">Plot Summary:</p>
               <p className="text-gray-200 leading-relaxed">{movie.plotSummary || "No summary available."}</p>
+            </div>
+
+            {/* Watchlist Button */}
+            <div className="mt-6">
+              <button
+                onClick={handleWatchlistClick}
+                disabled={watchlistProcessing}
+                className={`px-6 py-3 rounded-full font-bold text-white ${
+                  isInWatchlist ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+                } transition-colors disabled:opacity-70`}
+              >
+                {watchlistProcessing ? (isInWatchlist ? "Removing..." : "Adding...") : (isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist")}
+              </button>
             </div>
 
             {/* Owner Actions */}

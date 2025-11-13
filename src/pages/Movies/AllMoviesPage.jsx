@@ -34,7 +34,7 @@ const AllMoviesPage = () => {
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {movies.map(movie => (
-            <MovieCard key={movie._id} movie={movie} />
+            <MovieCard key={movie._id} movie={movie} showWatchlistButton={false} />
           ))}
         </div>
       </div>
@@ -42,4 +42,4 @@ const AllMoviesPage = () => {
   );
 };
 
-export default AllMoviesPage; 
+export default AllMoviesPage;

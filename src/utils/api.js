@@ -1,11 +1,9 @@
-// src/utils/api.js
-// .env ছাড়া → সব হার্ডকোড
+
 const API_URL = "http://localhost:5000"; // লোকাল (production-এ চেঞ্জ করো)
 
-// Helper: Get Firebase ID Token
+
 const getAuthToken = () => localStorage.getItem("fbIdToken");
 
-// Common fetch with token + error handling
 const apiFetch = async (url, options = {}) => {
   const token = getAuthToken();
   const headers = {
@@ -21,12 +19,11 @@ const apiFetch = async (url, options = {}) => {
     throw new Error(error.message || `HTTP ${res.status}`);
   }
 
-  // DELETE returns no content
+  // DELETE or empty response
   if (res.status === 204) return null;
   return res.json();
 };
 
-// API Object
 export const api = {
   async getMovies() {
     return apiFetch("/movies");
@@ -52,5 +49,24 @@ export const api = {
 
   async deleteMovie(id) {
     return apiFetch(`/movies/${id}`, { method: "DELETE" });
+  },
+
+  async getWatchlist() {
+    return apiFetch("/watchlist");
+  },
+
+  async addToWatchlist(movie) {
+    return apiFetch("/watchListInsert", {
+      method: "POST",
+      body: JSON.stringify(movie),
+    });
+  },
+
+  async removeFromWatchlist(id) {
+    return apiFetch(`/watchListDelete/${id}`, { method: "DELETE" });
+  },
+
+  async checkWatchlist(addedBy, movieId) {
+    return apiFetch(`/watchlist/check/${encodeURIComponent(addedBy)}/${movieId}`);
   },
 };

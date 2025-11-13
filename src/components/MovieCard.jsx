@@ -3,7 +3,13 @@ import { Link } from "react-router-dom";
 import { useWatchlist } from "../context/WatchlistContext";
 import { toast } from "react-toastify";
 
-const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
+const MovieCard = ({
+  movie,
+  showActions = false,
+  showWatchlistButton = true,
+  onEdit,
+  onDelete,
+}) => {
   const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   const isInWatchlist = watchlist.some((m) => m.id === movie.id);
 
@@ -45,20 +51,31 @@ const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
         </div>
         <p className="text-sm text-gray-400 mb-4 line-clamp-3">{movie.plotSummary || "No description"}</p>
 
-        {showActions ? (
-          <div className="flex gap-2">
-            <button onClick={onEdit} className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1">
+        {/* Edit/Delete Buttons */}
+        {showActions && (
+          <div className="flex gap-2 mb-2">
+            <button
+              onClick={onEdit}
+              className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1"
+            >
               <Edit2 size={16} /> Edit
             </button>
-            <button onClick={onDelete} className="flex-1 py-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1">
+            <button
+              onClick={onDelete}
+              className="flex-1 py-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1"
+            >
               <Trash2 size={16} /> Delete
             </button>
           </div>
-        ) : (
-          <Link to={`/movie/${movie._id}`} className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform text-center">
-            View Details
-          </Link>
         )}
+
+        {/* View Details inside hover overlay */}
+        <Link
+          to={`/movie/${movie._id}`}
+          className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold text-center text-white hover:scale-105 transition-transform"
+        >
+          View Details
+        </Link>
       </div>
 
       {/* Default Info */}
@@ -72,15 +89,25 @@ const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
           <span className="text-sm text-gray-400">{movie.releaseYear}</span>
         </div>
 
-        <button onClick={handleWatchlistClick} className={`w-full mt-3 py-2 rounded-full font-bold text-white ${isInWatchlist ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"} transition-colors`}>
-          {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
-        </button>
-
-        {!showActions && (
-          <Link to={`/movies/${movie._id}`} className="block mt-3 text-center py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform">
-            View Details
-          </Link>
+        {/* Watchlist Button */}
+        {showWatchlistButton && (
+          <button
+            onClick={handleWatchlistClick}
+            className={`w-full mt-3 py-2 rounded-full font-bold text-white ${
+              isInWatchlist ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+            } transition-colors`}
+          >
+            {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+          </button>
         )}
+
+        {/* Bottom View Details always visible */}
+        <Link
+          to={`/movie/${movie._id}`}
+          className="block mt-3 text-center py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform text-white"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );
