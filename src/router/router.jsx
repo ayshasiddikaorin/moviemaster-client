@@ -1,4 +1,3 @@
-// src/router/router.jsx
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import PrivateRoute from "../components/PrivateRoute";
@@ -11,9 +10,10 @@ import MyCollectionPage from "../pages/Movies/MyCollectionPage";
 import UpdateMoviePage from "../pages/Movies/UpdateMoviePage";
 import MovieDetailsPage from "../pages/Movies/MovieDetailsPage";
 import AboutPage from "../pages/About/AboutPage";
-import ContactPage from "../pages/Contact/ContactPage"; // ✅ New line added
+import ContactPage from "../pages/Contact/ContactPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
+import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage"; 
 import NotFoundPage from "../pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -25,7 +25,7 @@ export const router = createBrowserRouter([
       { path: "movies", element: <AllMoviesPage /> },
       { path: "movie/:id", element: <MovieDetailsPage /> },
       { path: "about", element: <AboutPage /> },
-      { path: "contact", element: <ContactPage /> }, // ✅ Contact route added
+      { path: "contact", element: <ContactPage /> },
 
       // Private Routes
       {
@@ -54,7 +54,10 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  //  Auth Routes
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
+  { path: "/forgot-password", element: <ForgotPasswordPage /> }, 
   { path: "*", element: <NotFoundPage /> },
 ]);

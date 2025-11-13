@@ -53,7 +53,9 @@ const LoginPage = () => {
             <p className="text-orange-300 text-sm mt-2">Welcome Back, Cinephile!</p>
           </div>
 
+          {/* Login Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email */}
             <div>
               <input
                 {...register("email", {
@@ -67,6 +69,7 @@ const LoginPage = () => {
               {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
+            {/* Password */}
             <div>
               <input
                 {...register("password", {
@@ -78,8 +81,16 @@ const LoginPage = () => {
                 className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
               />
               {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
+
+              {/* Forgot Password Link */}
+              <p className="text-right text-sm mt-2">
+                <Link to="/forgot-password" className="text-orange-400 hover:underline">
+                  Forgot Password?
+                </Link>
+              </p>
             </div>
 
+            {/* Login Button */}
             <button
               type="submit"
               disabled={loading}
@@ -89,12 +100,14 @@ const LoginPage = () => {
             </button>
           </form>
 
+          {/* OR Separator */}
           <div className="flex items-center my-6">
             <div className="flex-1 h-px bg-orange-800"></div>
             <span className="px-3 text-orange-400 text-sm">OR</span>
             <div className="flex-1 h-px bg-orange-800"></div>
           </div>
 
+          {/* Google Login */}
           <button
             onClick={handleGoogle}
             disabled={loading}
@@ -104,6 +117,7 @@ const LoginPage = () => {
             Continue with Google
           </button>
 
+          {/* Register Link */}
           <p className="text-center text-orange-300 text-sm mt-6">
             New here?{" "}
             <Link to="/register" className="text-orange-500 font-bold hover:underline">
