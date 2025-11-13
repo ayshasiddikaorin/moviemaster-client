@@ -3,7 +3,6 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../../utils/api";
 import { AuthContext } from "../../context/AuthContext";
-import { useWatchlist } from "../../context/WatchlistContext";
 import { toast } from "react-toastify";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
@@ -13,28 +12,12 @@ const MovieDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  const { watchlist, addToWatchlist: addToWatchlistContext, removeFromWatchlist: removeFromWatchlistContext } = useWatchlist();
 
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [watchlistProcessing, setWatchlistProcessing] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
-
-  // Robust check: watchlist item for this movie (for current user) - used as fallback or for docId
-  const findWatchlistItemForMovie = () => {
-    if (!movie || !watchlist || !Array.isArray(watchlist)) return null;
-
-    return watchlist.find((w) => {
-      if (w.movieId && String(w.movieId) === String(movie._id)) return true;
-      if (w.originalMovie && w.originalMovie._id && String(w.originalMovie._id) === String(movie._id)) return true;
-      if (w.movie && w.movie._id && String(w.movie._id) === String(movie._id)) return true;
-      if (w._id && String(w._id) === String(movie._id)) return true;
-      return false;
-    }) || null;
-  };
-
-  const watchlistItem = findWatchlistItemForMovie();
 
   useEffect(() => {
     let mounted = true;
@@ -45,8 +28,8 @@ const MovieDetailsPage = () => {
 
         setMovie(data);
 
-        if (user && user.uid) {
-          const check = await api.checkWatchlist(user.uid, data._id);
+        if (user && user.email) {
+          const check = await api.checkWatchlist(user.email, data._id);
           console.log(check);
           setIsInWatchlist(!!check.exists); // Set based on API response
         }
@@ -83,24 +66,15 @@ const MovieDetailsPage = () => {
 
   const handleWatchlistClick = async () => {
     if (!movie) return;
-    if (!user || !user.email || !user.uid) {
+    if (!user || !user.email) {
       toast.error("You must be logged in to manage your watchlist");
       return;
     }
 
     if (isInWatchlist) {
-      const watchlistDocId = watchlistItem && watchlistItem._id ? watchlistItem._id : null;
-
-      if (!watchlistDocId) {
-        toast.error("Can't determine watchlist item id to delete. Please open watchlist page and remove it from there.");
-        return;
-      }
-
       setWatchlistProcessing(true);
       try {
-        await api.deleteWatchlist(watchlistDocId); // expected to call DELETE /api/watchListDelete/:id
-        // update local context
-        removeFromWatchlistContext(watchlistDocId);
+        await api.removeFromWatchlist(user.email, movie._id);
         setIsInWatchlist(false); // Update state
         toast.info(`${movie.title} removed from Watchlist`);
       } catch (err) {
@@ -124,16 +98,9 @@ const MovieDetailsPage = () => {
         createdAt: new Date()
       };
 
-      const inserted = await api.addToWatchlist(payload); 
-      if (inserted && inserted._id) {
-        addToWatchlistContext(inserted);
-        setIsInWatchlist(true); 
-        toast.success(`${movie.title} added to Watchlist`);
-      } else {
-        addToWatchlistContext({ ...payload, _id: inserted?._id || `tmp-${Date.now()}` });
-        setIsInWatchlist(true); 
-        toast.success(`${movie.title} added to Watchlist (locally)`);
-      }
+      await api.addToWatchlist(payload); 
+      setIsInWatchlist(true); 
+      toast.success(`${movie.title} added to Watchlist`);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add to watchlist");

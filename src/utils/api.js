@@ -51,8 +51,9 @@ export const api = {
     return apiFetch(`/movies/${id}`, { method: "DELETE" });
   },
 
-  async getWatchlist() {
-    return apiFetch("/watchlist");
+  async getWatchlist(addedBy) {
+    // return apiFetch("/");
+        return apiFetch(`/myWatchList/${addedBy}`);
   },
 
   async addToWatchlist(movie) {
@@ -62,8 +63,8 @@ export const api = {
     });
   },
 
-  async removeFromWatchlist(id) {
-    return apiFetch(`/watchListDelete/${id}`, { method: "DELETE" });
+  async removeFromWatchlist(addedBy, movieId) {
+    return apiFetch(`/watchListDelete/${encodeURIComponent(addedBy)}/${movieId}`, { method: "DELETE" });
   },
 
   async checkWatchlist(addedBy, movieId) {

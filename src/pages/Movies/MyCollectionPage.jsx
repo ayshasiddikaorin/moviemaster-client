@@ -32,18 +32,7 @@ const MyCollectionPage = () => {
     fetchMyMovies();
   }, [user]);
 
-  const handleDelete = async (id) => {
-    try {
-      await api.deleteMovie(id);
-      setMovies(prev => prev.filter(m => m._id !== id));
-      toast.success("Movie deleted from collection!");
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      toast.error("Failed to delete movie");
-    }
-  };
-
-  
+    
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-orange-400">
@@ -75,19 +64,18 @@ const MyCollectionPage = () => {
   return (
     <div className="min-h-screen bg-black py-24 px-4">
       <div className="container mx-auto">
-        { }
+      
         <h1 className="text-5xl md:text-6xl font-black text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
           My Collection ({movies.length})
         </h1>
 
-        { }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {movies.map((movie) => (
             <MovieCard
               key={movie._id}
               movie={movie}
-              showActions={true}
-              onDelete={() => handleDelete(movie._id)}
+              // showActions={true}
+              // onDelete={() => handleDelete(movie._id)}
             />
           ))}
         </div>
