@@ -1,6 +1,7 @@
 // src/pages/Home/HomePage.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Play, Star, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../../utils/api";
