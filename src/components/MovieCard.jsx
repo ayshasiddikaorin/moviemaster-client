@@ -1,8 +1,22 @@
-// src/components/MovieCard.jsx
 import { Star, Calendar, Edit2, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useWatchlist } from "../context/WatchlistContext";
+import { toast } from "react-toastify";
 
 const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
+  const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const isInWatchlist = watchlist.some((m) => m.id === movie.id);
+
+  const handleWatchlistClick = () => {
+    if (isInWatchlist) {
+      removeFromWatchlist(movie.id);
+      toast.info(`${movie.title} removed from Watchlist`);
+    } else {
+      addToWatchlist(movie);
+      toast.success(`${movie.title} added to Watchlist`);
+    }
+  };
+
   return (
     <div className="group relative bg-white/5 backdrop-blur-xl border border-orange-800/30 rounded-2xl overflow-hidden cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-500">
       {/* Poster */}
@@ -31,41 +45,23 @@ const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
         </div>
         <p className="text-sm text-gray-400 mb-4 line-clamp-3">{movie.plotSummary || "No description"}</p>
 
-        {/* Actions: Edit / Delete / View Details */}
         {showActions ? (
           <div className="flex gap-2">
-
-            <button
-              onClick={onEdit}
-              className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1"
-            >
+            <button onClick={onEdit} className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1">
               <Edit2 size={16} /> Edit
             </button>
-            
-               {/* <Link
-                to="/add-movie"
-                className="px-8 py-3 bg-white/10 backdrop-blur-xl border border-orange-500/50 rounded-full font-bold hover:bg-orange-500/20 transition-all"
-              >
-                Edit
-              </Link> */}
-            <button
-              onClick={onDelete}
-              className="flex-1 py-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1"
-            >
+            <button onClick={onDelete} className="flex-1 py-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full text-sm font-bold hover:scale-105 transition-transform flex items-center justify-center gap-1">
               <Trash2 size={16} /> Delete
             </button>
           </div>
         ) : (
-          <Link
-            to={`/movie/${movie._id}`}
-            className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform text-center"
-          >
+          <Link to={`/movie/${movie._id}`} className="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform text-center">
             View Details
           </Link>
         )}
       </div>
 
-      {/* Default Info (Non-Hover) */}
+      {/* Default Info */}
       <div className="p-4">
         <h3 className="font-bold text-lg truncate text-orange-300">{movie.title}</h3>
         <div className="flex items-center justify-between mt-2">
@@ -76,12 +72,12 @@ const MovieCard = ({ movie, showActions, onEdit, onDelete }) => {
           <span className="text-sm text-gray-400">{movie.releaseYear}</span>
         </div>
 
-        {/* Default Actions (Non-Hover) */}
+        <button onClick={handleWatchlistClick} className={`w-full mt-3 py-2 rounded-full font-bold text-white ${isInWatchlist ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"} transition-colors`}>
+          {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+        </button>
+
         {!showActions && (
-          <Link
-            to={`/movies/${movie._id}`}
-            className="block mt-3 text-center py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform"
-          >
+          <Link to={`/movies/${movie._id}`} className="block mt-3 text-center py-2 bg-gradient-to-r from-orange-500 to-orange-700 rounded-full font-bold hover:scale-105 transition-transform">
             View Details
           </Link>
         )}

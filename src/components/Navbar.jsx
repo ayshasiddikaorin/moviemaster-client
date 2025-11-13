@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, User, Menu, X } from "lucide-react";
 import { useState, useContext } from "react";
@@ -41,6 +40,7 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center space-x-8 font-medium">
           <NavLink to="/" className={navLinkClass}>Home</NavLink>
           <NavLink to="/movies" className={navLinkClass}>All Movies</NavLink>
+          <NavLink to="/watchlist" className={navLinkClass}>Watchlist</NavLink> {/* ✅ Added */}
           <NavLink to="/add-movie" className={navLinkClass}>Add Movie</NavLink>
           <NavLink to="/my-collection" className={navLinkClass}>My Collection</NavLink>
         </div>
@@ -102,7 +102,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu Button */}
           <button
             className="lg:hidden p-2 rounded-full bg-white/10 hover:bg-orange-500/20 transition-all"
             onClick={toggleMenu}
@@ -133,6 +133,7 @@ const Navbar = () => {
             {[
               { to: "/", label: "Home" },
               { to: "/movies", label: "All Movies" },
+              { to: "/watchlist", label: "Watchlist" }, // ✅ Added
               { to: "/add-movie", label: "Add Movie" },
               { to: "/my-collection", label: "My Collection" },
             ].map((item) => (

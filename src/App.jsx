@@ -3,8 +3,10 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes/router"; // তোমার router ফাইলের import
 
-const App = ({ children }) => {
+const App = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -20,7 +22,7 @@ const App = ({ children }) => {
           pauseOnHover
           theme="dark"
         />
-        {children}
+        <RouterProvider router={router} />
       </AuthProvider>
     </ThemeProvider>
   );

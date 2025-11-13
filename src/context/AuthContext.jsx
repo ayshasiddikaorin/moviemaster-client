@@ -1,6 +1,4 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
-
 import { auth } from "../firebase/firebase.config";
 import {
   signInWithEmailAndPassword,
@@ -14,7 +12,6 @@ import {
 
 export const AuthContext = createContext();
 
-// কাস্টম হুক — সব জায়গায় ব্যবহার করবে
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {

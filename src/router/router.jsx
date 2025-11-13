@@ -1,3 +1,4 @@
+// src/router/router.jsx
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import PrivateRoute from "../components/PrivateRoute";
@@ -9,6 +10,7 @@ import AddMoviePage from "../pages/Movies/AddMoviePage";
 import MyCollectionPage from "../pages/Movies/MyCollectionPage";
 import UpdateMoviePage from "../pages/Movies/UpdateMoviePage";
 import MovieDetailsPage from "../pages/Movies/MovieDetailsPage";
+import WatchlistPage from "../pages/Watchlist/WatchlistPage"; // ✅ Add WatchlistPage
 import AboutPage from "../pages/About/AboutPage";
 import ContactPage from "../pages/Contact/ContactPage";
 import LoginPage from "../pages/Auth/LoginPage";
@@ -26,6 +28,9 @@ export const router = createBrowserRouter([
       { path: "movie/:id", element: <MovieDetailsPage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
+
+      // Watchlist route
+      { path: "watchlist", element: <WatchlistPage /> },
 
       // Private Routes
       {
@@ -55,9 +60,9 @@ export const router = createBrowserRouter([
     ],
   },
 
-  //  Auth Routes
+  // Auth Routes
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
-  { path: "/forgot-password", element: <ForgotPasswordPage /> }, 
+  { path: "/forgot-password", element: <ForgotPasswordPage /> },
   { path: "*", element: <NotFoundPage /> },
 ]);
