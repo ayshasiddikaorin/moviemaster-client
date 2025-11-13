@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 // src/components/Navbar.jsx
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, User, Menu, X } from "lucide-react";
+import {  User, Menu, X } from "lucide-react";
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
@@ -62,11 +63,6 @@ const Navbar = () => {
 
         {/* Right Side */}
         <div className="flex items-center space-x-4">
-          {/* Search (Desktop) */}
-          <button className="hidden md:block p-2 rounded-full bg-white/10 hover:bg-orange-500/20 transition-all">
-            <Search size={20} className="text-orange-400" />
-          </button>
-
           {/* Profile Dropdown */}
           <div className="relative group">
             <button className="p-2 rounded-full bg-white/10 hover:bg-orange-500/20 transition-all">
@@ -139,20 +135,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Search */}
-      {!isMenuOpen && (
-        <div className="lg:hidden px-4 pb-3">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search movies..."
-              className="w-full bg-white/10 backdrop-blur-xl border border-orange-800/50 rounded-xl px-4 py-3 pl-11 text-white placeholder-orange-300 focus:outline-none focus:border-orange-500 transition-all"
-            />
-            <Search size={18} className="absolute left-4 top-3.5 text-orange-400" />
-          </div>
-        </div>
-      )}
-
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="lg:hidden bg-black/90 backdrop-blur-xl border-t border-orange-800, border-orange-800/50">
@@ -162,10 +144,9 @@ const Navbar = () => {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `block px-4 py-3 rounded-xl text-lg font-medium transition-all ${
-                    isActive
-                      ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
-                      : "text-gray-300 hover:bg-white/10 hover:text-orange-400"
+                  `block px-4 py-3 rounded-xl text-lg font-medium transition-all ${isActive
+                    ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg"
+                    : "text-gray-300 hover:bg-white/10 hover:text-orange-400"
                   }`
                 }
                 onClick={closeMenu}

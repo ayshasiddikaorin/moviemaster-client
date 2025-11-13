@@ -1,10 +1,10 @@
 // src/pages/Profile/Profile.jsx
 import React, { useState, useEffect } from "react";
-// import { useAuth } from "../../context/AuthProvider"; // Use useAuth hook
 import { useAuth } from "../../context/AuthContext";
 import { updateProfile } from "firebase/auth";
 import { toast } from "react-toastify";
 import { Navigate, Link } from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { FaUser, FaEdit, FaArrowLeft } from "react-icons/fa";
 

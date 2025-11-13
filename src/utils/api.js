@@ -1,5 +1,5 @@
 
-const API_URL = "http://localhost:5000"; // লোকাল (production-এ চেঞ্জ করো)
+const API_URL = "http://localhost:5000"; 
 
 
 const getAuthToken = () => localStorage.getItem("fbIdToken");

@@ -5,6 +5,7 @@ import { api } from "../../utils/api";
 import { AuthContext } from "../../context/AuthContext";
 import { useWatchlist } from "../../context/WatchlistContext";
 import { toast } from "react-toastify";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { FaStar, FaClock, FaCalendar, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 
@@ -49,7 +50,9 @@ const MovieDetailsPage = () => {
           console.log(check);
           setIsInWatchlist(!!check.exists); // Set based on API response
         }
-      } catch (err) {
+      }
+      // eslint-disable-next-line no-unused-vars
+      catch (err) {
         toast.error("Movie not found");
         navigate("/movies");
       } finally {

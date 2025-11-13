@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../utils/api"; // your api.js
 import { toast } from "react-toastify";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 
 const AddMoviePage = () => {
@@ -38,7 +40,7 @@ const AddMoviePage = () => {
             setValue(key, movie[key]);
           }
         });
-        setValue("addedBy", movie.addedBy); // optional: show but not editable
+        setValue("addedBy", movie.addedBy); 
       } catch (err) {
         toast.error("Failed to load movie");
         navigate("/my-collection");
