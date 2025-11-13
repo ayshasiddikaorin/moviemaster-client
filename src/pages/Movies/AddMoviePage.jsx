@@ -1,32 +1,64 @@
-import { useContext, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { AuthContext } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
+import { api } from "../../utils/api"; // your api.js
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 
 const AddMoviePage = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
+  const { id } = useParams(); // movie ID for edit
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const isEditMode = !!id;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm();
+
+  // Fetch movie data if editing
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    const fetchMovie = async () => {
+      setFetching(true);
+      try {
+        const movie = await api.getMovieById(id);
+        // Pre-fill form
+        Object.keys(movie).forEach((key) => {
+          if (key === "nowShowing") {
+            setValue(key, movie[key].toString());
+          } else if (key !== "_id" && key !== "addedBy" && key !== "createdAt") {
+            setValue(key, movie[key]);
+          }
+        });
+        setValue("addedBy", movie.addedBy); // optional: show but not editable
+      } catch (err) {
+        toast.error("Failed to load movie");
+        navigate("/my-collection");
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchMovie();
+  }, [id, isEditMode, setValue, navigate]);
 
   const onSubmit = async (data) => {
     if (!user) {
-      toast.error("Please login to add movies");
+      toast.error("Please login to save movie");
       navigate("/login");
       return;
     }
 
     setLoading(true);
 
-    // Build the exact payload the API expects
     const payload = {
       title: data.title,
       genre: data.genre,
@@ -40,32 +72,33 @@ const AddMoviePage = () => {
       language: data.language,
       country: data.country,
       addedBy: user.email,
-      nowShowing: data.nowShowing === "true", // API expects boolean
+      nowShowing: data.nowShowing === "true",
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/movies/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to add movie");
+      if (isEditMode) {
+        await api.updateMovie(id, payload);
+        toast.success("Movie updated successfully!");
+      } else {
+        await api.addMovie(payload);
+        toast.success("Movie added successfully!");
       }
-
-      toast.success("Movie added successfully!");
       reset();
       navigate("/my-collection");
     } catch (err) {
-      toast.error(err.message || "Failed to add movie");
+      toast.error(err.message || "Failed to save movie");
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetching) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-100px)] bg-black flex items-center justify-center px-4 py-16 relative overflow-hidden">
@@ -84,10 +117,10 @@ const AddMoviePage = () => {
       >
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">
-            Add New Movie
+            {isEditMode ? "Edit Movie" : "Add New Movie"}
           </h1>
           <p className="text-orange-300 text-sm mt-2">
-            Share your favorite film
+            {isEditMode ? "Update movie details" : "Share your favorite film"}
           </p>
         </div>
 
@@ -100,11 +133,7 @@ const AddMoviePage = () => {
               placeholder="Movie Title"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.title && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.title.message}
-              </p>
-            )}
+            {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title.message}</p>}
           </div>
 
           {/* Poster URL */}
@@ -115,11 +144,7 @@ const AddMoviePage = () => {
               placeholder="Poster URL"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.posterUrl && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.posterUrl.message}
-              </p>
-            )}
+            {errors.posterUrl && <p className="text-red-400 text-xs mt-1">{errors.posterUrl.message}</p>}
           </div>
 
           {/* Rating */}
@@ -135,11 +160,7 @@ const AddMoviePage = () => {
               placeholder="Rating (0-10)"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.rating && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.rating.message}
-              </p>
-            )}
+            {errors.rating && <p className="text-red-400 text-xs mt-1">{errors.rating.message}</p>}
           </div>
 
           {/* Genre */}
@@ -156,11 +177,7 @@ const AddMoviePage = () => {
               <option value="Horror">Horror</option>
               <option value="Thriller">Thriller</option>
             </select>
-            {errors.genre && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.genre.message}
-              </p>
-            )}
+            {errors.genre && <p className="text-red-400 text-xs mt-1">{errors.genre.message}</p>}
           </div>
 
           {/* Release Year */}
@@ -174,11 +191,7 @@ const AddMoviePage = () => {
               placeholder="Release Year"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.releaseYear && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.releaseYear.message}
-              </p>
-            )}
+            {errors.releaseYear && <p className="text-red-400 text-xs mt-1">{errors.releaseYear.message}</p>}
           </div>
 
           {/* Director */}
@@ -189,11 +202,7 @@ const AddMoviePage = () => {
               placeholder="Director"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.director && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.director.message}
-              </p>
-            )}
+            {errors.director && <p className="text-red-400 text-xs mt-1">{errors.director.message}</p>}
           </div>
 
           {/* Cast */}
@@ -204,9 +213,7 @@ const AddMoviePage = () => {
               placeholder="Cast (comma separated)"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.cast && (
-              <p className="text-red-400 text-xs mt-1">{errors.cast.message}</p>
-            )}
+            {errors.cast && <p className="text-red-400 text-xs mt-1">{errors.cast.message}</p>}
           </div>
 
           {/* Duration */}
@@ -220,11 +227,7 @@ const AddMoviePage = () => {
               placeholder="Duration (minutes)"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.duration && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.duration.message}
-              </p>
-            )}
+            {errors.duration && <p className="text-red-400 text-xs mt-1">{errors.duration.message}</p>}
           </div>
 
           {/* Language */}
@@ -235,11 +238,7 @@ const AddMoviePage = () => {
               placeholder="Language"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.language && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.language.message}
-              </p>
-            )}
+            {errors.language && <p className="text-red-400 text-xs mt-1">{errors.language.message}</p>}
           </div>
 
           {/* Country */}
@@ -250,11 +249,7 @@ const AddMoviePage = () => {
               placeholder="Country"
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.country && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.country.message}
-              </p>
-            )}
+            {errors.country && <p className="text-red-400 text-xs mt-1">{errors.country.message}</p>}
           </div>
 
           {/* Now Showing */}
@@ -267,46 +262,33 @@ const AddMoviePage = () => {
               <option value="true">Yes</option>
               <option value="false">No</option>
             </select>
-            {errors.nowShowing && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.nowShowing.message}
-              </p>
-            )}
+            {errors.nowShowing && <p className="text-red-400 text-xs mt-1">{errors.nowShowing.message}</p>}
           </div>
 
           {/* Plot Summary */}
           <div>
             <textarea
-              {...register("plotSummary", {
-                required: "Plot Summary is required",
-              })}
+              {...register("plotSummary", { required: "Plot Summary is required" })}
               placeholder="Plot Summary"
               rows={4}
               className="w-full px-4 py-3 bg-white/10 border border-orange-500/50 rounded-xl text-white placeholder-orange-300 focus:outline-none focus:border-orange-300 transition"
             />
-            {errors.plotSummary && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.plotSummary.message}
-              </p>
-            )}
+            {errors.plotSummary && <p className="text-red-400 text-xs mt-1">{errors.plotSummary.message}</p>}
           </div>
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
             className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-700 text-white font-bold rounded-xl hover:from-orange-600 hover:to-orange-800 transition-all transform hover:scale-105 shadow-lg disabled:opacity-70"
           >
-            {loading ? "Adding…" : "Add Movie"}
+            {loading ? "Saving…" : isEditMode ? "Update Movie" : "Add Movie"}
           </button>
         </form>
 
         <p className="text-center text-orange-300 text-sm mt-6">
           Changed your mind?{" "}
-          <Link
-            to="/movies"
-            className="text-orange-500 font-bold hover:underline"
-          >
+          <Link to="/movies" className="text-orange-500 font-bold hover:underline">
             Back to Movies
           </Link>
         </p>

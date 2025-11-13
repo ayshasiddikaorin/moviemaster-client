@@ -15,9 +15,9 @@ import AboutPage from "../pages/About/AboutPage";
 import ContactPage from "../pages/Contact/ContactPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
-import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage"; 
+import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
 import NotFoundPage from "../pages/NotFoundPage";
-
+import Profile from "../pages/Profile/Profile";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -46,6 +46,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <MyCollectionPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/my-profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
           </PrivateRoute>
         ),
       },

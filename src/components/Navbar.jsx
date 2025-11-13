@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, User, Menu, X } from "lucide-react";
 import { useState, useContext } from "react";
@@ -28,6 +29,15 @@ const Navbar = () => {
       ? "text-orange-500 font-bold"
       : "text-gray-300 hover:text-orange-400 transition-colors duration-200";
 
+  const navItems = [
+    { to: "/", label: "Home" },
+    { to: "/movies", label: "All Movies" },
+    { to: "/watchlist", label: "Watchlist" },
+    { to: "/add-movie", label: "Add Movie" },
+    { to: "/my-collection", label: "My Collection" },
+    // { to: "/my-profile", label: "My Profile" },
+  ];
+
   return (
     <nav className="bg-black/80 backdrop-blur-xl border-b border-orange-900/20 sticky top-0 z-50 shadow-2xl">
       <div className="px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -38,11 +48,16 @@ const Navbar = () => {
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center space-x-8 font-medium">
-          <NavLink to="/" className={navLinkClass}>Home</NavLink>
-          <NavLink to="/movies" className={navLinkClass}>All Movies</NavLink>
-          <NavLink to="/watchlist" className={navLinkClass}>Watchlist</NavLink> {/* ✅ Added */}
-          <NavLink to="/add-movie" className={navLinkClass}>Add Movie</NavLink>
-          <NavLink to="/my-collection" className={navLinkClass}>My Collection</NavLink>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={navLinkClass}
+              onClick={closeMenu}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </div>
 
         {/* Right Side */}
@@ -60,6 +75,7 @@ const Navbar = () => {
                   src={user.photoURL}
                   alt="Profile"
                   className="w-8 h-8 rounded-full object-cover border-2 border-orange-500"
+                  onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/32?text=U")}
                 />
               ) : (
                 <User size={20} className="text-orange-400" />
@@ -74,13 +90,24 @@ const Navbar = () => {
                 </p>
                 <p className="text-xs text-gray-400 truncate">{user?.email}</p>
               </div>
+
+              {/* === PROFILE & LOGOUT IN DROPDOWN === */}
               {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 transition-colors"
-                >
-                  Logout
-                </button>
+                <>
+                  <Link
+                    to="/my-profile"
+                    className="block px-4 py-2 text-sm text-orange-400 hover:bg-orange-500/20 transition-colors"
+                    onClick={closeMenu}
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
@@ -128,15 +155,9 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-black/90 backdrop-blur-xl border-t border-orange-800/50">
+        <div className="lg:hidden bg-black/90 backdrop-blur-xl border-t border-orange-800, border-orange-800/50">
           <div className="flex flex-col p-4 space-y-2">
-            {[
-              { to: "/", label: "Home" },
-              { to: "/movies", label: "All Movies" },
-              { to: "/watchlist", label: "Watchlist" }, // ✅ Added
-              { to: "/add-movie", label: "Add Movie" },
-              { to: "/my-collection", label: "My Collection" },
-            ].map((item) => (
+            {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
