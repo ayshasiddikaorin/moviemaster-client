@@ -1,5 +1,6 @@
+// const API_URL = "http://localhost:5000"; 
+const API_URL = "https://moviemaster-server-fxhpwi9hp-ayshas-projects-422b85a6.vercel.app/api"; 
 
-const API_URL = "http://localhost:5000"; 
 
 
 const getAuthToken = () => localStorage.getItem("fbIdToken");
